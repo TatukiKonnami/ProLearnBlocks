@@ -8,8 +8,8 @@ class Token{
         this.kind = kind
         this.value = value
     }
-    toSting() {
-        return this.kind + " / " + this.value;
+    dump() {
+        return this.kind + " : " + this.value;
     }
 }
 
@@ -27,7 +27,7 @@ class Lexer{
     // get check node 
     charactor(){
         if(this.isEOF()){
-            console.log("No more charactor")
+            console.log("find EOF")
         }
         return this.text[this.i]
     }
@@ -48,7 +48,18 @@ class Lexer{
 
     // check operator
     isSignStart(c){
-        return c == "=" || c == "+" || c == "*" || c == "/"
+        return c == "=" 
+            || c == "+" 
+            || c == "*" 
+            || c == "/" 
+            || c == ";" 
+            || c == "(" 
+            || c == ")"
+            || c == "{"
+            || c == "}"
+            || c == "\""
+            || c == "%"
+            || c == ","
     }
 
     // check number 
@@ -86,16 +97,25 @@ class Lexer{
         var reg = /[A-Za-z]/
         while(!this.isEOF() && (!isNaN(this.charactor()) || reg.test(this.charactor())) ) {
             b = b + this.next()
+            if(this.charactor() == " " ){
+                break
+            }
         }
         var t = new Token()
         t.set("variable", b)
         return t
     }
 
+    eof(){
+        var t = new Token()
+        t.set("EOF", this.charactor())
+        return t
+    }
+
     nextToken(){
         this.skipWhiteSpace()
         if(this.isEOF()){
-            return NaN
+            return this.eof()
         } else if(this.isSignStart(this.charactor())) {
             return this.sign()
         } else if(this.isDIgitStart(this.charactor())) {
@@ -110,7 +130,7 @@ class Lexer{
     tokenize(){
         var tokens = []
         var t = this.nextToken()
-        while(t != NaN) {
+        while(t.kind != "EOF") {
             tokens.push(t)
             t = this.nextToken()
         }
@@ -118,13 +138,14 @@ class Lexer{
     }
 }
 
-
-var l = new Lexer("a = 10 b = 1 * 2  / 3 ")
+text = ""
+var l = new Lexer("int main(void) { int a; a = 10 + 9; printf(\"%d\", a); return 0; }")
 var tokens = [] 
 tokens = l.tokenize()
-for(t in tokens){
-    console.log(t.toSting())
-}
+tokens.forEach(token => {
+    console.log(token.dump())
+})
+
 
 
 
